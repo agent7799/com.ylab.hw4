@@ -16,7 +16,7 @@ public class MovieTest {
     File dataFile = new File("src/film.csv");
     movieLoader.loadData(dataFile);
 
-    //select * from movie;
+    //select * from movie
   }
 
   private static DataSource initDb() throws SQLException {
