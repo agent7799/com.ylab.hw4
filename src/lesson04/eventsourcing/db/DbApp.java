@@ -29,7 +29,7 @@ public class DbApp {
   private static DataSource initDb() throws SQLException {
     String ddl = "" 
                      + "drop table if exists person;" 
-                     + "create if not exists table person (\n"
+                     + "create table if not exists person (\n"
                      + "person_id bigint primary key,\n"
                      + "first_name varchar,\n"
                      + "last_name varchar,\n"
