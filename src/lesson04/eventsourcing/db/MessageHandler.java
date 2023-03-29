@@ -51,7 +51,6 @@ public class MessageHandler {
         }
         if (carrier.getCommand().equals("save")) {
             save(carrier.getPerson());
-            System.out.println("save command got");
         }
         if (carrier.getCommand().equals("delete")) {
             delete(carrier.getPerson());
@@ -62,7 +61,7 @@ public class MessageHandler {
     private void delete(Person person) throws SQLException {
         try {
             Long id = person.getId();
-            if (containsPerson(new Person(id, null, null, null))) {
+            if (!containsPerson(new Person(id, null, null, null))) {
                 System.err.println("No person with id = " + id);
                 return;
             }
@@ -94,14 +93,12 @@ public class MessageHandler {
     }
 
     private boolean containsPerson(Person p) throws SQLException {
-        String sqlMessage = "select count(*) from person where person_id = ?;";
+        String sqlMessage = "select person_id from person where person_id = ?;";
         try (java.sql.Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(sqlMessage)) {
             preparedStatement.setLong(1, p.getId());
             ResultSet resultSet = preparedStatement.executeQuery();
-            boolean isPresent = resultSet.next();
-            System.out.println(isPresent);
-            return isPresent;
+            return resultSet.next();
         }
     }
 }

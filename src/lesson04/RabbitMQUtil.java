@@ -13,7 +13,7 @@ public class RabbitMQUtil {
    * Надо настроить RabbitMQ таким образом, чтобы он работал со следующими
    * настройками
    */
-  public static ConnectionFactory buildConnectionFactory() throws IOException, TimeoutException {
+  public static ConnectionFactory buildConnectionFactory() throws IOException, TimeoutException, ClassNotFoundException {
     ConnectionFactory connectionFactory = new ConnectionFactory();
     connectionFactory.setHost("localhost");
     connectionFactory.setPort(5672);
