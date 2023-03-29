@@ -18,8 +18,6 @@ public class DbApp {
     } catch (Exception e) {
       e.printStackTrace();
     }
-
-    // тут пишем создание и запуск приложения работы с БД
   }
   
   private static ConnectionFactory initMQ() throws Exception {
