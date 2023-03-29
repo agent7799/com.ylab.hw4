@@ -9,12 +9,15 @@ import javax.sql.DataSource;
 
 
 public class DbApp {
-  public static void main(String[] args) throws Exception {
-    DataSource dataSource = initDb();
-    ConnectionFactory connectionFactory = initMQ();
-    MessageHandler handler = new MessageHandler(connectionFactory, dataSource);
-    handler.execute();
-
+  public static void main(String[] args) {
+    try {
+      DataSource dataSource = initDb();
+      ConnectionFactory connectionFactory = initMQ();
+      MessageHandler handler = new MessageHandler(connectionFactory, dataSource);
+      handler.execute();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
 
     // тут пишем создание и запуск приложения работы с БД
   }
