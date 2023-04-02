@@ -33,11 +33,12 @@ public class MessageFilterImpl implements MessageFilter {
         }
         return applyCase(message, censoredNoCase);
     }
+
     private String applyCase(String message, String censured) {
         StringBuilder temp = new StringBuilder(message);
         for (int i = 0; i < message.length(); i++) {
             if (message.charAt(i) != censured.charAt(i) && censured.charAt(i) == '*') {
-                    temp.setCharAt(i,'*');
+                temp.setCharAt(i, '*');
             }
         }
         return temp.toString();
@@ -52,4 +53,5 @@ public class MessageFilterImpl implements MessageFilter {
     private String[] splitMessage(String message) {
         return message.trim().split("[^\\wА-Яа-я]+");
     }
+
 }
