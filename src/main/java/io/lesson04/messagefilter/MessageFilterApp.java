@@ -25,11 +25,11 @@ public class MessageFilterApp {
                 applicationContext.getBean(ConnectionFactory.class));
 
         int sleepPeriod = 5;
+        String message;
         try {
             uploader.fillTable();
             while (!Thread.currentThread().isInterrupted()) {
                 try {
-                    String message;
                     message = receiver.receiveMessage();
                     message = filter.filter(message);
                     sender.sendMessage(message);
