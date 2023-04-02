@@ -13,7 +13,7 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 
 public class MessageFilterApp {
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) {
         AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(Config.class);
         applicationContext.start();
         FileUploaderToDb uploader = new FileUploaderToDbImpl(applicationContext.getBean(DataSource.class),
@@ -24,25 +24,28 @@ public class MessageFilterApp {
         CensoredMessageSender sender = new CensoredMessageSenderImpl(
                 applicationContext.getBean(ConnectionFactory.class));
 
-        while (!Thread.currentThread().isInterrupted()) {
-            try {
-                uploader.fillTable();
-                String message;
-                message = receiver.receiveMessage();
-                message = filter.filter(message);
-                sender.send(message);
-
-            } catch (NullPointerException e) {
-                int period = 20;
-                System.err.printf("No messages! Next check in %d seconds\n", period);
-                Thread.sleep(Duration.of(period, ChronoUnit.SECONDS));
-            } catch (Exception e) {
-                e.printStackTrace();
-                break;
+        int sleepPeriod = 5;
+        try {
+            uploader.fillTable();
+            while (!Thread.currentThread().isInterrupted()) {
+                try {
+                    String message;
+                    message = receiver.receiveMessage();
+                    message = filter.filter(message);
+                    sender.sendMessage(message);
+                } catch (NullPointerException e) {
+                    for (int i = sleepPeriod; i > 0; i--) {
+                        String msg = "No messages! Next check in " + i + " seconds";
+                        System.err.printf(msg);
+                        Thread.sleep(Duration.of(1, ChronoUnit.SECONDS));
+                        System.err.print("\b".repeat(msg.length()));
+                    }
+                }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         applicationContext.close();
-
     }
 }
 

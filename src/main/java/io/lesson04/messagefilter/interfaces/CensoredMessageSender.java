@@ -4,5 +4,5 @@ import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
 public interface CensoredMessageSender {
- void send(String message) throws IOException, TimeoutException;
+ void sendMessage(String message) throws IOException, TimeoutException;
 }

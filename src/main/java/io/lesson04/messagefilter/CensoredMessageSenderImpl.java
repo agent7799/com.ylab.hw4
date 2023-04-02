@@ -15,7 +15,7 @@ public class CensoredMessageSenderImpl implements CensoredMessageSender {
     }
 
     @Override
-    public void send(String message) throws IOException, TimeoutException {
+    public void sendMessage(String message) throws IOException, TimeoutException {
         try (Connection connection = factory.newConnection();
              Channel channel = connection.createChannel()){
             channel.queueDeclare("output", false, false, false, null);

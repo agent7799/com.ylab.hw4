@@ -4,10 +4,8 @@ import io.lesson04.messagefilter.interfaces.MessageFilter;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+
 @Component
 public class MessageFilterImpl implements MessageFilter {
     private final DataSource dataSource;
@@ -18,44 +16,37 @@ public class MessageFilterImpl implements MessageFilter {
 
     @Override
     public String filter(String message) throws SQLException {
-        if (message.isBlank()) {
-            return message;
-        }
-        String command = getSqlCommand(message);
-        if (command == null) {
-            return message;
-        }
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(command)) {
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                String word = resultSet.getString("word");
-                String censured = censuringWord(word);
-                message = message.replaceFirst(word, censured);
+        String censoredNoCase = message;
+        if (!message.isBlank()) {
+            String sqlCommand = "select word from swear_word where word ilike any(?);";
+            try (Connection connection = dataSource.getConnection();
+                 PreparedStatement preparedStatement = connection.prepareStatement(sqlCommand)) {
+                Array array = connection.createArrayOf("varchar", splitMessage(message));
+                preparedStatement.setArray(1, array);
+                ResultSet resultSet = preparedStatement.executeQuery();
+                while (resultSet.next()) {
+                    String word = resultSet.getString("word");
+                    String censured = censuringWord(word);
+                    censoredNoCase = censoredNoCase.replaceAll("(?iu)" + word, censured);
+                }
             }
         }
-        return message;
+        return applyCase(message, censoredNoCase);
+    }
+    private String applyCase(String message, String censured) {
+        StringBuilder temp = new StringBuilder(message);
+        for (int i = 0; i < message.length(); i++) {
+            if (message.charAt(i) != censured.charAt(i) && censured.charAt(i) == '*') {
+                    temp.setCharAt(i,'*');
+            }
+        }
+        return temp.toString();
     }
 
     private String censuringWord(String word) {
         return word.charAt(0) +
-                "*".repeat(Math.max(0, word.length() - 2)) +
+                "*".repeat(word.length() - 2) +
                 word.charAt(word.length() - 1);
-    }
-
-    private String getSqlCommand(String message) {
-        String[] words = splitMessage(message);
-        if (words.length == 0) {
-            return null;
-        }
-        String tableName = "swear_word";
-        StringBuilder sqlCommand = new StringBuilder("select * from " + tableName + " where upper(word) in('");
-        for (String word : words) {
-            sqlCommand.append(word.toUpperCase()).append("','");
-        }
-        sqlCommand.replace(sqlCommand.length() - 2, sqlCommand.length(), ");");
-        System.out.println(sqlCommand);
-        return sqlCommand.toString();
     }
 
     private String[] splitMessage(String message) {
