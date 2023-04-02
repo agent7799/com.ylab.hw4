@@ -41,7 +41,7 @@ public class SQLQueryBuilderImpl implements SQLQueryBuilder {
         List<String> resultList;
         try (Connection connection = dataSource.getConnection()) {
             DatabaseMetaData metaData = connection.getMetaData();
-            ResultSet resultSet = metaData.getTables(null, null, "%", null); //new String[]{"TABLE", "SYSTEM_TABLE"}
+            ResultSet resultSet = metaData.getTables(null, null, "%", new String[]{"TABLE", "SYSTEM VIEW"}); //new String[]{"TABLE", "SYSTEM_TABLE"}
             resultList = new ArrayList<>();
             while (resultSet.next()) {
                 resultList.add(resultSet.getString("TABLE_NAME"));

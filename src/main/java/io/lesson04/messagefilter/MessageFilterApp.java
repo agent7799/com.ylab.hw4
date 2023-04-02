@@ -16,11 +16,15 @@ public class MessageFilterApp {
     public static void main(String[] args) {
         AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(Config.class);
         applicationContext.start();
+
         FileUploaderToDb uploader = new FileUploaderToDbImpl(applicationContext.getBean(DataSource.class),
                 applicationContext.getBean(File.class));
+
         RawMessageReceiver receiver = new RawMessageReceiverImpl(
                 applicationContext.getBean(ConnectionFactory.class));
+
         MessageFilter filter = new MessageFilterImpl(applicationContext.getBean(DataSource.class));
+
         CensoredMessageSender sender = new CensoredMessageSenderImpl(
                 applicationContext.getBean(ConnectionFactory.class));
 
