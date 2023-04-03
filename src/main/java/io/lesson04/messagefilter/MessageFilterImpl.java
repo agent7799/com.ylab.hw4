@@ -37,12 +37,10 @@ public class MessageFilterImpl implements MessageFilter {
     }
 
     private String mergeCase(String raw, String censured) {
-        StringBuilder result = new StringBuilder();
+        StringBuilder result = new StringBuilder(raw);
         for (int i = 0; i < raw.length(); i++) {
-            if (raw.charAt(i) != censured.charAt(i) && censured.charAt(i) == '*') {
-                result.append(censured.charAt(i));
-            } else {
-                result.append(raw.charAt(i));
+            if (censured.charAt(i) == '*') {
+                result.replace(i, i + 1, "*");
             }
         }
         return result.toString();
