@@ -1,6 +1,5 @@
 package io.lesson04.sqlquerybuilder;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
@@ -15,7 +14,7 @@ import java.util.List;
 public class SQLQueryBuilderImpl implements SQLQueryBuilder {
     private final DataSource dataSource;
 
-    public SQLQueryBuilderImpl(@Autowired DataSource dataSource) {
+    public SQLQueryBuilderImpl(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 

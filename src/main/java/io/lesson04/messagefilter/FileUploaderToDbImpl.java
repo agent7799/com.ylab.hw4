@@ -3,6 +3,7 @@ package io.lesson04.messagefilter;
 import io.lesson04.messagefilter.interfaces.FileUploaderToDb;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 import java.io.BufferedReader;
 import java.io.File;
@@ -31,6 +32,7 @@ public class FileUploaderToDbImpl implements FileUploaderToDb {
         }
     }
 
+    @PostConstruct
     @Override
     public void fillTable() throws SQLException, IOException {
         if (doesTableExist()) {
@@ -52,6 +54,5 @@ public class FileUploaderToDbImpl implements FileUploaderToDb {
             connection.commit();
         }
     }
-
 }
 

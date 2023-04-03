@@ -5,6 +5,8 @@ import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
 import java.sql.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @Component
 public class MessageFilterImpl implements MessageFilter {
@@ -16,38 +18,43 @@ public class MessageFilterImpl implements MessageFilter {
 
     @Override
     public String filter(String message) throws SQLException {
-        String censoredNoCase = message;
+        System.out.println("raw: " + message);
         if (!message.isBlank()) {
-            String sqlCommand = "select word from swear_word where word ilike any(?);";
+            String sqlCommand = "select word from swear_word where word ilike any(?) order by length(word) desc;";
             try (Connection connection = dataSource.getConnection();
                  PreparedStatement preparedStatement = connection.prepareStatement(sqlCommand)) {
                 Array array = connection.createArrayOf("varchar", splitMessage(message));
                 preparedStatement.setArray(1, array);
                 ResultSet resultSet = preparedStatement.executeQuery();
-                while (resultSet.next()) {
-                    String word = resultSet.getString("word");
-                    String censured = censuringWord(word);
-                    censoredNoCase = censoredNoCase.replaceAll("(?iu)" + word, censured);
+                Set<String> obsceneWords = new HashSet<>();
+                if (resultSet.next()) {
+                    do {
+                        obsceneWords.add(resultSet.getString("word").toLowerCase());
+                    } while (resultSet.next());
+                    message = applyCensure(message, obsceneWords);
                 }
             }
         }
-        return applyCase(message, censoredNoCase);
+        System.out.println("censured: " + message);
+        return message;
     }
 
-    private String applyCase(String message, String censured) {
-        StringBuilder temp = new StringBuilder(message);
-        for (int i = 0; i < message.length(); i++) {
-            if (message.charAt(i) != censured.charAt(i) && censured.charAt(i) == '*') {
-                temp.setCharAt(i, '*');
+    private String applyCensure(String message, Set<String> obsceneWords) {
+        StringBuilder messageBuilder = new StringBuilder(message);
+        StringBuilder currentWord = new StringBuilder();
+        for (int i = 0, wordStart = 0; i < message.length(); i++) {
+            if (String.valueOf(message.charAt(i)).matches("[\\wА-Яа-я]")) {
+                currentWord.append(message.charAt(i));
+                wordStart = wordStart != 0 ? wordStart : i;
+            } else if (currentWord.length() > 0) {
+                if (obsceneWords.contains(currentWord.toString().toLowerCase())) {
+                    messageBuilder.replace(++wordStart, i - 1, "*".repeat(currentWord.length() - 2));
+                }
+                wordStart = 0;
+                currentWord.setLength(0);
             }
         }
-        return temp.toString();
-    }
-
-    private String censuringWord(String word) {
-        return word.charAt(0) +
-                "*".repeat(word.length() - 2) +
-                word.charAt(word.length() - 1);
+        return messageBuilder.toString();
     }
 
     private String[] splitMessage(String message) {
