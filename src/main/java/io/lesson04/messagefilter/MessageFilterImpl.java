@@ -16,7 +16,7 @@ public class MessageFilterImpl implements MessageFilter {
 
     @Override
     public String filter(String message) throws SQLException {
-        System.out.println("raw: " + message);
+        System.out.println("raw:\n" + message);
         String filteredMessage = message;
         if (!message.isBlank()) {
             String sqlCommand = "select distinct word from swear_word where word ilike any(?);";
@@ -32,7 +32,7 @@ public class MessageFilterImpl implements MessageFilter {
             }
         }
         message = message.equals(filteredMessage) ? message : mergeCase(message, filteredMessage);
-        System.out.println("censured: " + message);
+        System.out.println("censured:\n" + message);
         return message;
     }
 
