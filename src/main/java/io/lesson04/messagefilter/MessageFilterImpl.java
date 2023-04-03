@@ -19,7 +19,7 @@ public class MessageFilterImpl implements MessageFilter {
         System.out.println("raw: " + message);
         String filteredMessage = message;
         if (!message.isBlank()) {
-            String sqlCommand = "select word from swear_word where word ilike any(?) order by length(word);";
+            String sqlCommand = "select distinct word from swear_word where word ilike any(?);";
             try (Connection connection = dataSource.getConnection();
                  PreparedStatement preparedStatement = connection.prepareStatement(sqlCommand)) {
                 Array array = connection.createArrayOf("varchar", splitMessage(message));
