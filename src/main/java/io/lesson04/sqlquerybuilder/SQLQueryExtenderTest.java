@@ -15,5 +15,6 @@ public class SQLQueryExtenderTest {
     for (String tableName : tables) {
       System.out.println(queryBuilder.queryForTable(tableName));
     }
+    applicationContext.close();
   }
 }
