@@ -1,16 +1,14 @@
 package io.lesson04.eventsourcing.api;
 
 
-import com.rabbitmq.client.ConnectionFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import javax.sql.DataSource;
 
 public class ApiApp {
   public static void main(String[] args) {
     try {
       AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
-      PersonApi personApi = new PersonApiImpl(context.getBean(ConnectionFactory.class), context.getBean(DataSource.class));
+      PersonApi personApi = context.getBean(PersonApi.class);
 
       personApi.savePerson(1L, "Ivan", "Baraban", "Lol");
       personApi.savePerson(1L, "Ivan", "Baraban", "Edit");
