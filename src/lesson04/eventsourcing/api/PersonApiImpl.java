@@ -2,10 +2,8 @@ package lesson04.eventsourcing.api;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.rabbitmq.client.BuiltinExchangeType;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.*;
+import lesson04.eventsourcing.MessageCarrier;
 import lesson04.eventsourcing.Person;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -35,7 +33,9 @@ public class PersonApiImpl implements PersonApi {
 
     @Override
     public void deletePerson(Long personId) throws IOException, TimeoutException {
-        String msg = "delete=%=" + personId;
+        MessageCarrier carrier = new MessageCarrier("delete", new Person(personId, null, null, null));
+        ObjectMapper objectMapper = new ObjectMapper();
+        String msg = objectMapper.writeValueAsString(carrier);
         sendMessage(msg);
     }
 
@@ -43,7 +43,9 @@ public class PersonApiImpl implements PersonApi {
     public void savePerson(Long personId, String firstName, String lastName, String middleName) throws IOException, TimeoutException {
         Person p = new Person(personId, firstName, lastName, middleName);
         ObjectMapper objectMapper = new ObjectMapper();
-        String msg = "save=%=" + objectMapper.writeValueAsString(p);
+        MessageCarrier carrier = new MessageCarrier("save", p);
+        String msg = objectMapper.writeValueAsString(carrier);
+        System.out.println(msg);
         sendMessage(msg);
     }
 
@@ -88,9 +90,10 @@ public class PersonApiImpl implements PersonApi {
         try (Connection connection = factory.newConnection();
              Channel channel = connection.createChannel()) {
             channel.exchangeDeclare(exchangeName, BuiltinExchangeType.DIRECT);
-            channel.queueDeclare(queueName, true, false, false, null);
+            AMQP.Queue.DeclareOk queue = channel.queueDeclare(queueName, true, false, false, null);
             channel.queueBind(queueName, exchangeName, "*");
-            channel.basicPublish(exchangeName, "key", null, msg.getBytes());
+            channel.basicPublish("", queue.getQueue(), null, msg.getBytes());
+            System.out.println("message sent!");
         }
     }
 }

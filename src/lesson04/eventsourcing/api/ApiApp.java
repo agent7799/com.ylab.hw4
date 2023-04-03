@@ -16,6 +16,11 @@ public class ApiApp {
 
       // Тут пишем создание PersonApi, запуск и демонстрацию работы
       personApi.savePerson(1L, "Ivan", "Baraban", "Lol");
+      personApi.savePerson(1L, "Ivan", "Baraban", "Edit");
+      personApi.savePerson(2L, "Sergey", "Sax", "Tenor");
+      personApi.savePerson(3L, "Tamara", "Tuba", "Big");
+      personApi.deletePerson(1L);
+
     } catch (Exception e) {
       e.printStackTrace();
     }

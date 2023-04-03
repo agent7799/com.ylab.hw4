@@ -9,14 +9,15 @@ import javax.sql.DataSource;
 
 
 public class DbApp {
-  public static void main(String[] args) throws Exception {
-    DataSource dataSource = initDb();
-    ConnectionFactory connectionFactory = initMQ();
-    MessageHandler handler = new MessageHandler(connectionFactory, dataSource);
-    handler.execute();
-
-
-    // тут пишем создание и запуск приложения работы с БД
+  public static void main(String[] args) {
+    try {
+      DataSource dataSource = initDb();
+      ConnectionFactory connectionFactory = initMQ();
+      MessageHandler handler = new MessageHandler(connectionFactory, dataSource);
+      handler.execute();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
   
   private static ConnectionFactory initMQ() throws Exception {
@@ -26,7 +27,7 @@ public class DbApp {
   private static DataSource initDb() throws SQLException {
     String ddl = "" 
                      + "drop table if exists person;" 
-                     + "create if not exists table person (\n"
+                     + "create table if not exists person (\n"
                      + "person_id bigint primary key,\n"
                      + "first_name varchar,\n"
                      + "last_name varchar,\n"
