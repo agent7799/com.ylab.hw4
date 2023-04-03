@@ -18,7 +18,6 @@ import java.sql.SQLException;
 public class FileUploaderToDbImpl implements FileUploaderToDb {
     private final DataSource dataSource;
     private final File file;
-    private final String tableName = "swear_word";
 
     public FileUploaderToDbImpl(DataSource dataSource, File file) {
         this.dataSource = dataSource;
@@ -27,6 +26,7 @@ public class FileUploaderToDbImpl implements FileUploaderToDb {
 
     private boolean doesTableExist() throws SQLException {
         try (Connection connection = dataSource.getConnection()) {
+            String tableName = "swear_word";
             ResultSet tables = connection.getMetaData().getTables(null, null, tableName, new String[]{"TABLE"});
             return tables.next() && tableName.equals(tables.getString("TABLE_NAME"));
         }
@@ -35,14 +35,14 @@ public class FileUploaderToDbImpl implements FileUploaderToDb {
     @PostConstruct
     @Override
     public void fillTable() throws SQLException, IOException {
+        String sqlOnLaunchCommand = "create table swear_word (word varchar(20));";
         if (doesTableExist()) {
-            return;
+            sqlOnLaunchCommand = "truncate table swear_word;";
         }
-        String sqlCreateTableCommand = "create table " + tableName + " (word varchar(20));";
-        String sqlFillTableCommand = "insert into " + tableName + " (word) values (?);";
+        String sqlFillTableCommand = "insert into swear_word (word) values (?);";
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
              Connection connection = dataSource.getConnection();
-             PreparedStatement creatorStatement = connection.prepareStatement(sqlCreateTableCommand);
+             PreparedStatement creatorStatement = connection.prepareStatement(sqlOnLaunchCommand);
              PreparedStatement fillerStatement = connection.prepareStatement(sqlFillTableCommand)) {
             creatorStatement.executeUpdate();
             connection.setAutoCommit(false);

@@ -20,6 +20,9 @@ public class SQLQueryBuilderImpl implements SQLQueryBuilder {
 
     @Override
     public String queryForTable(String tableName) throws SQLException {
+        if (getTables(tableName).size() < 1) {
+            return null;
+        }
         StringBuilder str = new StringBuilder("SELECT ");
         try (Connection connection = dataSource.getConnection()) {
             DatabaseMetaData metaData = connection.getMetaData();
@@ -36,11 +39,12 @@ public class SQLQueryBuilderImpl implements SQLQueryBuilder {
     }
 
     @Override
-    public List<String> getTables() throws SQLException {
+
+    public List<String> getTables(String tableName) throws SQLException {
         List<String> resultList;
         try (Connection connection = dataSource.getConnection()) {
             DatabaseMetaData metaData = connection.getMetaData();
-            ResultSet resultSet = metaData.getTables(null, null, "%", new String[]{"TABLE", "SYSTEM VIEW"}); //new String[]{"TABLE", "SYSTEM_TABLE"}
+            ResultSet resultSet = metaData.getTables(null, null, tableName, new String[]{"TABLE", "SYSTEM VIEW"}); //new String[]{"TABLE", "SYSTEM_TABLE"}
             resultList = new ArrayList<>();
             while (resultSet.next()) {
                 resultList.add(resultSet.getString("TABLE_NAME"));

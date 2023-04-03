@@ -5,5 +5,6 @@ import java.util.List;
 
 public interface SQLQueryBuilder {
   String queryForTable(String tableName) throws SQLException;
-  List<String> getTables() throws SQLException;
+
+  List<String> getTables(String tableName) throws SQLException;
 }
