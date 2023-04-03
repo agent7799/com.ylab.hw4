@@ -19,7 +19,7 @@ public class MessageFilterImpl implements MessageFilter {
         System.out.println("raw: " + message);
         String filteredMessage = message;
         if (!message.isBlank()) {
-            String sqlCommand = "select word from swear_word where word ilike any(?) order by length(word) desc;";
+            String sqlCommand = "select word from swear_word where word ilike any(?) order by length(word);";
             try (Connection connection = dataSource.getConnection();
                  PreparedStatement preparedStatement = connection.prepareStatement(sqlCommand)) {
                 Array array = connection.createArrayOf("varchar", splitMessage(message));
@@ -49,11 +49,11 @@ public class MessageFilterImpl implements MessageFilter {
     }
 
     private String censorWord(String word) {
-        return word.charAt(0) + "*".repeat(word.length() - 2) + word.charAt(word.length() - 1);
+        return word.length() == 2 ? "**" : word.charAt(0) + "*".repeat(word.length() - 2) + word.charAt(word.length() - 1);
     }
 
     private String[] splitMessage(String message) {
-        return message.trim().split("[^\\wА-Яа-я]+");
+        return message.trim().split("[^\\wА-Яа-яЁё]+");
     }
 
 }
